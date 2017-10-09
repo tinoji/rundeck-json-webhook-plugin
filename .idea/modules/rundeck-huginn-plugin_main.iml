@@ -10,6 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: org.rundeck:rundeck-core:2.9.3" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.3.1" level="project" />
     <orderEntry type="library" name="Gradle: org.rundeck:rundeck-storage-api:2.9.3" level="project" />
     <orderEntry type="library" name="Gradle: org.rundeck:rundeck-storage-conf:2.9.3" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.ant:ant:1.8.3" level="project" />
