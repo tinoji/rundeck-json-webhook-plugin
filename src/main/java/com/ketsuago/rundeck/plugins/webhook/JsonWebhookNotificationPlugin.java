@@ -1,4 +1,4 @@
-package com.ketsuago.rundeck.plugins.huginn;
+package com.ketsuago.rundeck.plugins.webhook;
 
 import com.dtolabs.rundeck.plugins.notification.NotificationPlugin;
 import com.dtolabs.rundeck.core.plugins.Plugin;
@@ -11,64 +11,49 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.rmi.server.ExportException;
 import java.util.*;
 import com.google.gson.Gson;
 
-@Plugin(service="Notification",name="example")
-@PluginDescription(title="Example Plugin", description="An example Plugin for Rundeck Notifications.")
-public class HuginnNotificationPlugin implements NotificationPlugin{
+@Plugin(service="Notification",name="JsonWebhookNotification")
+@PluginDescription(title="JSON Webhook", description="POST JSON data to a webhook URL")
+public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
-//    @PluginProperty(name = "example",title = "Example String",description = "Example description")
-//    private String example;
-
-    @PluginProperty(name = "webhook",title = "huginn webhook URL",description = "Set URL of a webhook agent of huginn")
+    @PluginProperty(name = "webhookURL", title = "webhook URL", description = "")
     private String webhookURL;
 
-    public HuginnNotificationPlugin(){
-
+    public JsonWebhookNotificationPlugin() {
+        // Do not remove constructor
     }
 
     public boolean postNotification(String trigger, Map executionData, Map config) {
-        System.err.printf("Trigger %s fired for %s, configuration: %s\n",trigger,executionData,config);
-        System.err.printf("Local field example is: %s\n",webhookURL);
-        return true;
-    }
+        // merge trigger, executionData and config
+        Map<String, Object> allData = new HashMap<>();
+        allData.put("trigger", trigger);
+        allData.put("execution", executionData);
+        allData.put("config", config);
 
-    // test code for parse map to json and POST json
-    public static void main(String args[]) {
-
-        Map<String, String> map = new HashMap<>();
-        map.put("id", "1");
-        map.put("href", "hogehoge");
-        System.out.println(map);
-
-        // map -> json
+        // convert map to json
         Gson gson = new Gson();
-        String json = gson.toJson(map);
-        System.out.println(json);
-
+        String executionJson = gson.toJson(allData);
 
         HttpURLConnection con = null;
-        String testHTTPServer = "http://posttestserver.com/post.php";
         StringBuffer result = new StringBuffer();
 
         try {
-            URL url = new URL(testHTTPServer);
+            URL url = new URL(webhookURL);
             con = (HttpURLConnection) url.openConnection();
             con.setDoOutput(true);
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
             OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-            out.write(json);
+            out.write(executionJson);
             out.close();
             con.connect();
 
-            // HTTPレスポンスコード
+            // HTTP response code
             final int status = con.getResponseCode();
             if (status == HttpURLConnection.HTTP_OK) {
-                // 通信に成功した
-                // テキストを取得する
+                // get response
                 final InputStream in = con.getInputStream();
                 String encoding = con.getContentEncoding();
 
@@ -78,7 +63,7 @@ public class HuginnNotificationPlugin implements NotificationPlugin{
                 final InputStreamReader inReader = new InputStreamReader(in, encoding);
                 final BufferedReader bufReader = new BufferedReader(inReader);
                 String line = null;
-                // 1行ずつテキストを読み込む
+
                 while ((line = bufReader.readLine()) != null) {
                     result.append(line);
                 }
@@ -86,16 +71,19 @@ public class HuginnNotificationPlugin implements NotificationPlugin{
                 inReader.close();
                 in.close();
             } else {
-                System.out.println(status);
+                System.err.printf("ERROR! HTTP code: %d\n", status);
+                return false;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             if (con != null) {
                 con.disconnect();
             }
         }
-        System.out.println("result=" + result.toString());
+        System.err.printf("POST result: %s\n", result.toString());
+        return true;
     }
 }
