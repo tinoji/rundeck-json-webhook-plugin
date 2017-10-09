@@ -1,0 +1,29 @@
+group 'com.ketsuago'
+version '1.0-SNAPSHOT'
+defaultTasks 'clean','build'
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+//    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile(group:'org.rundeck', name: 'rundeck-core', version: '2.9.3')
+}
+
+
+ext.pluginClassNames='com.ketsuago.rundeck.plugins.huginn.HuginnNotificationPlugin'
+jar {
+    manifest {
+        attributes 'Rundeck-Plugin-Version': '1.2', 'Rundeck-Plugin-Archive': 'true', 'Rundeck-Plugin-Classnames': pluginClassNames, 'Rundeck-Plugin-File-Version': "${version}"
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0'
+}
