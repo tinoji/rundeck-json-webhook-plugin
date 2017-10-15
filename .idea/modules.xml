@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin_main.iml" group="rundeck-huginn-plugin" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-huginn-plugin_test.iml" group="rundeck-huginn-plugin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin_main.iml" group="rundeck-json-webhook-plugin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/rundeck-json-webhook-plugin_test.iml" group="rundeck-json-webhook-plugin" />
     </modules>
   </component>
 </project>
