@@ -28,7 +28,7 @@ import java.util.*;
 import com.google.gson.Gson;
 
 @Plugin(service="Notification",name="JsonWebhookNotification")
-@PluginDescription(title="JSON Webhook", description="POST JSON data to a webhook URL")
+@PluginDescription(title="JSON Webhook", description="")
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
     @PluginProperty(name = "webhookURL", title = "webhook URL", description = "Enter comma-separated URLs")
@@ -55,7 +55,7 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         Gson gson = new Gson();
         String executionJson = gson.toJson(allData);
 
-
+        // post json to URLs
         for (String webhookURL: webhookURLs) {
             HttpResponse response = postWebhook(webhookURL, executionJson);
 
@@ -65,40 +65,6 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
             }
         }
         return true;
-
-    }
-
-
-
-
-    private URL toURL(String str) {
-        try {
-            return new URL(str);
-        } catch (MalformedURLException e) {
-            throw new JsonWebhookNotificationPluginException("Webhook URL is malformed: [" + e.getMessage() +"]", e);
-        }
-    }
-
-    private HttpURLConnection openConnection(URL url) {
-        try {
-            return (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error opening connection to Webhook URL: [" + e.getMessage() + "]", e);
-        }
-    }
-
-    private void putRequestStream(HttpURLConnection con, String message) {
-        try {
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-            out.write(message);
-            out.close();
-        } catch (ProtocolException e) {
-            throw new JsonWebhookNotificationPluginException("Error in the underlying protocol: [" + e.getMessage() + "]", e);
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error putting data to Webhook URL: [" + e.getMessage() + "]", e);
-        }
     }
 
 
@@ -117,8 +83,36 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         } finally {
             if (con != null) {
                 con.disconnect();
-//                System.err.println("!!!!disconnect!!!");
             }
+        }
+    }
+
+    private URL toURL(String str) {
+        try {
+            return new URL(str);
+        } catch (MalformedURLException e) {
+            throw new JsonWebhookNotificationPluginException("Webhook URL is malformed: [" + e.getMessage() +"]", e);
+        }
+    }
+
+    private HttpURLConnection openConnection(URL url) {
+        try {
+            return (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
+        }
+    }
+
+    private void putRequestStream(HttpURLConnection con, String message) {
+        try {
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+            out.write(message);
+        } catch (ProtocolException e) {
+            throw new JsonWebhookNotificationPluginException("Error in the underlying protocol: [" + e.getMessage() + "]", e);
+        } catch (IOException e) {
+            throw new JsonWebhookNotificationPluginException("Error putting data to Webhook URL: [" + e.getMessage() + "]", e);
         }
     }
 }

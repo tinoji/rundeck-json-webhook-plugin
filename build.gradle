@@ -2,7 +2,6 @@ group 'com.ketsuago'
 version '1.0-SNAPSHOT'
 defaultTasks 'clean','build'
 apply plugin: 'java'
-//apply plugin: 'idea'
 
 sourceCompatibility = 1.8
 
