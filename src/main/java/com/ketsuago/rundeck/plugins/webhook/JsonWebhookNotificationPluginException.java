@@ -19,7 +19,6 @@ package com.ketsuago.rundeck.plugins.webhook;
 
 public class JsonWebhookNotificationPluginException extends RuntimeException{
 
-
     public JsonWebhookNotificationPluginException(String message) {
         super(message);
     }

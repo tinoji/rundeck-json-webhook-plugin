@@ -24,5 +24,5 @@ jar {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0'
+    gradleVersion = '4.2'
 }

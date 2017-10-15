@@ -1,8 +1,28 @@
 # rundeck-json-webhook-plugin
-A Rundeck Plugin to POST JSON data to a webhook URL
+A Rundeck plugin to POST JSON data to a Webhook URL.
 
-## development memo
-### JSON format
+## Installation
+1. Download jar file from the latest release(**link here after release**)
+1. Move or copy jar file to `$RDECK_BASE/libext/`. The default path should be `/var/lib/rundeck/libext/`.
+
+## Build
+You can get jar file by building the source by gradle.
+1. git clone
+1. `./gradlew build`
+1. jar file will be created at `build/libs`
+
+
+## Configuration
+
+
+
+
+## Usage
+
+
+
+
+## JSON example
 
 ```
 {
@@ -69,7 +89,7 @@ A Rundeck Plugin to POST JSON data to a webhook URL
   },
   "trigger": "success",
   "config": {
-    "webhookURL": "http://posttestserver.com/post.php"
+    "webhookURL": "http://192.168.10.10:8080"
   }
 }
 ```

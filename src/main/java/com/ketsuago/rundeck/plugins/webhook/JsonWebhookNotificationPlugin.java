@@ -31,7 +31,7 @@ import com.google.gson.Gson;
 @PluginDescription(title="JSON Webhook", description="")
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
-    @PluginProperty(name = "webhookURL", title = "webhook URL", description = "Enter comma-separated URLs")
+    @PluginProperty(name = "webhookURL", title = "URL(s)", description = "Enter comma-separated URLs", defaultValue = "http://")
     private String strWebhookURL;
 
     public JsonWebhookNotificationPlugin() {
