@@ -13,11 +13,12 @@ You can get jar file by building the source by gradle.
 
 
 ## Configuration
+**screenshots here**
 
 
 
-
-## Usage
+## Demo
+**Huginn example here**
 
 
 
@@ -93,3 +94,8 @@ You can get jar file by building the source by gradle.
   }
 }
 ```
+
+## License
+Copyright (c) 2017 KIKUCHI Hiroaki.
+
+Licensed under the Apache License-2.0(see `./LICENSE`)
