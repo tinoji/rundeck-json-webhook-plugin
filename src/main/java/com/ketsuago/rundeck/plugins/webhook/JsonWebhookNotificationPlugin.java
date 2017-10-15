@@ -55,47 +55,20 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         Gson gson = new Gson();
         String executionJson = gson.toJson(allData);
 
-        return postWebhook(webhookURLs, executionJson);
-    }
-
-
-    private boolean postWebhook(List<String> webhookURLs, String executionJson) {
-        HttpURLConnection con;
-//        StringBuffer result = new StringBuffer();
 
         for (String webhookURL: webhookURLs) {
-            URL url = toURL(webhookURL);
-            con = openConnection(url);
-            con.setDoOutput(true);
-            putRequestStream(con, executionJson);
+            HttpResponse response = postWebhook(webhookURL, executionJson);
 
-            final int responseCode = getResponseCode(con);
-            final String responseMessage = getResponseMessage(con);
-
-//            final InputStream input = getResponseStream(con);
-//            final InputStreamReader inReader = getResponseReader(input, "UTF-8");
-//            final BufferedReader bufReader = new BufferedReader(inReader);
-//
-//            String line;
-//            while ((line = readLineFromBuffer(bufReader)) != null) {
-//                result.append(line);
-//            }
-
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: server response: " + responseCode + " " + responseMessage);
-            }
-
-            try {
-//                bufReader.close();
-//                inReader.close();
-//                input.close();
-                con.disconnect();
-            } catch (Exception e) {
-                // ignore
+            if (response.getCode() != HttpURLConnection.HTTP_OK) {
+                throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: " +
+                        "server response: " + response.getCode() + " " + response.getMessage());
             }
         }
         return true;
+
     }
+
+
 
 
     private URL toURL(String str) {
@@ -128,87 +101,24 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         }
     }
 
-    private int getResponseCode(HttpURLConnection con) {
+
+    private HttpResponse postWebhook(String URL, String message) {
+        HttpURLConnection con = null;
         try {
+            URL url = toURL(URL);
+            con = openConnection(url);
+            con.setDoOutput(true);
+            putRequestStream(con, message);
             con.connect();
-            return con.getResponseCode();
+
+            return new HttpResponse(con.getResponseCode(), con.getResponseMessage());
         } catch (IOException e) {
             throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+//                System.err.println("!!!!disconnect!!!");
+            }
         }
     }
-
-    private String getResponseMessage(HttpURLConnection con) {
-        try {
-            con.connect();
-            return con.getResponseMessage();
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
-        }
-    }
-
-
-//    private InputStream getResponseStream(HttpURLConnection con) {
-//        InputStream input;
-//        try {
-//            input = con.getInputStream();
-//        } catch (IOException e) {
-//            input = con.getErrorStream();
-//        }
-//        return input;
-//    }
-//
-//    private InputStreamReader getResponseReader(InputStream input, String encoding) {
-//        try {
-//            return new InputStreamReader(input, encoding);
-//        } catch (UnsupportedEncodingException e) {
-//            throw new JsonWebhookNotificationPluginException("URL encoding error: [" + e.getMessage() + "]", e);
-//        }
-//    }
-//
-//    private String readLineFromBuffer(BufferedReader bufReader) {
-//        try {
-//            return bufReader.readLine();
-//        } catch (IOException e) {
-//            throw new JsonWebhookNotificationPluginException("Error reading a line from buffer: [" + e.getMessage() + "]", e);
-//        }
-//    }
-
-
-
-//    public static void main(String[] args) {
-//        HttpURLConnection con;
-//        StringBuffer result = new StringBuffer();
-//
-//        String webhookURL = "http://192.168.10.29:8000";
-//        URL url = toURL(webhookURL);
-//        con = openConnection(url);
-//        con.setDoOutput(true);
-//        putRequestStream(con, "hoge");
-//
-//        final int status = getResponseCode(con);
-//        final String  message = getResponseMessage(con);
-//
-//        final InputStream input = getResponseStream(con);
-//        final InputStreamReader inReader = getResponseReader(input, "UTF-8");
-//        final BufferedReader bufReader = new BufferedReader(inReader);
-//
-//        String line;
-//        while ((line = readLineFromBuffer(bufReader)) != null) {
-//            result.append(line);
-//        }
-//
-//
-//        if (status != HttpURLConnection.HTTP_OK) {
-//            throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: server response: " + status + " " + message);
-//        }
-//
-//        try {
-//            bufReader.close();
-//            inReader.close();
-//            input.close();
-//            con.disconnect();
-//        } catch (Exception e) {
-//            // ignore
-//        }
-//    }
 }
