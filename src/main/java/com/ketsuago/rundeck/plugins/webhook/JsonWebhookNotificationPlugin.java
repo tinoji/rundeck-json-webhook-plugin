@@ -58,7 +58,6 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         // post json to URLs
         for (String webhookURL: webhookURLs) {
             HttpResponse response = postWebhook(webhookURL, executionJson);
-
             if (response.getCode() != HttpURLConnection.HTTP_OK) {
                 throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: " +
                         "server response: " + response.getCode() + " " + response.getMessage());
@@ -109,6 +108,7 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
             con.setRequestProperty("Content-Type", "application/json");
             OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
             out.write(message);
+            out.close();
         } catch (ProtocolException e) {
             throw new JsonWebhookNotificationPluginException("Error in the underlying protocol: [" + e.getMessage() + "]", e);
         } catch (IOException e) {
