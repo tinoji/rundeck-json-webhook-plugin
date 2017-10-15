@@ -17,12 +17,18 @@
 package com.ketsuago.rundeck.plugins.webhook;
 
 public class HttpResponse {
+    private String url;
     private int code;
     private String message;
 
-    public HttpResponse(int code, String message) {
+    public HttpResponse(String url, int code, String message) {
+        this.url = url;
         this.code = code;
         this.message = message;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public int getCode() {

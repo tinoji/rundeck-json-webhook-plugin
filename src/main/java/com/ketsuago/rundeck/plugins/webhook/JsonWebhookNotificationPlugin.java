@@ -50,14 +50,30 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         String executionJson = gson.toJson(allData);
 
         // post json to URLs
-        List<String> webhookURLs = Arrays.asList(STR_WEBHOOK_URL.split(","));
-        for (String webhookURL: webhookURLs) {
-            webhookURL = webhookURL.trim();
-            HttpResponse response = postWebhook(webhookURL, executionJson);
+        List<HttpResponse> failedResponses = new ArrayList<>();
+
+        List<String> webhookUrls = Arrays.asList(STR_WEBHOOK_URL.split(","));
+        for (String url: webhookUrls) {
+            url = url.trim();
+            HttpResponse response = postWebhook(url, executionJson);
             if (response.getCode() != HttpURLConnection.HTTP_OK) {
-                throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: " +
-                        "server response: " + response.getCode() + " " + response.getMessage());
+                failedResponses.add(response);
             }
+        }
+        if (!failedResponses.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (HttpResponse res: failedResponses) {
+                sb.append(res.getUrl())
+                        .append(", server response ")
+                        .append(res.getCode())
+                        .append(", ")
+                        .append(res.getMessage())
+                        .append("; ");
+            }
+            // TODO: refactor
+            sb.deleteCharAt(sb.length()-1);
+            sb.deleteCharAt(sb.length()-1);
+            throw new JsonWebhookNotificationPluginException("Failed to POST to following URLs: " + sb.toString());
         }
         return true;
     }
@@ -72,7 +88,7 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
             putRequestStream(con, message);
             con.connect();
 
-            return new HttpResponse(con.getResponseCode(), con.getResponseMessage());
+            return new HttpResponse(strUrl, con.getResponseCode(), con.getResponseMessage());
         } catch (IOException e) {
             throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
         } finally {
