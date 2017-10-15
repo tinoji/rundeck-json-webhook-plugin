@@ -32,19 +32,13 @@ import com.google.gson.Gson;
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
     @PluginProperty(name = "webhookURL", title = "URL(s)", description = "Enter comma-separated URLs", required = true)
-    private String strWebhookURL;
+    private String STR_WEBHOOK_URL; // from GUI input
 
     public JsonWebhookNotificationPlugin() {
         // Do not remove constructor
     }
 
     public boolean postNotification(String trigger, Map executionData, Map config) {
-        // get URL list and trim extra blanks
-        List<String> webhookURLs = Arrays.asList(strWebhookURL.split(","));
-        for (int i = 0; i < webhookURLs.size(); i++) {
-            webhookURLs.set(i, webhookURLs.get(i).trim());
-        }
-
         // merge trigger, executionData and config
         Map<String, Object> allData = new HashMap<>();
         allData.put("trigger", trigger);
@@ -56,7 +50,9 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         String executionJson = gson.toJson(allData);
 
         // post json to URLs
+        List<String> webhookURLs = Arrays.asList(STR_WEBHOOK_URL.split(","));
         for (String webhookURL: webhookURLs) {
+            webhookURL = webhookURL.trim();
             HttpResponse response = postWebhook(webhookURL, executionJson);
             if (response.getCode() != HttpURLConnection.HTTP_OK) {
                 throw new JsonWebhookNotificationPluginException("URL " + webhookURL + ": Unable to POST notification: " +
@@ -67,10 +63,10 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
     }
 
 
-    private HttpResponse postWebhook(String URL, String message) {
+    private HttpResponse postWebhook(String strUrl, String message) {
         HttpURLConnection con = null;
         try {
-            URL url = toURL(URL);
+            URL url = toURL(strUrl);
             con = openConnection(url);
             con.setDoOutput(true);
             putRequestStream(con, message);
