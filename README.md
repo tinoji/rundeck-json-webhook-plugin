@@ -5,7 +5,7 @@ This plugin was developed for [Huginn](https://github.com/huginn/huginn) which s
 
 
 ## Installation
-1. Download jar file from the latest release(**link here after release**)
+1. Download jar file from the [latest release](https://github.com/tinoji/rundeck-json-webhook-plugin/releases)
 1. Move or copy jar file to `$RDECK_BASE/libext/`. The default path should be `/var/lib/rundeck/libext/`.
 
 
