@@ -21,7 +21,6 @@ import com.dtolabs.rundeck.plugins.notification.NotificationPlugin;
 import com.dtolabs.rundeck.core.plugins.Plugin;
 import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.descriptions.PluginProperty;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -31,7 +30,7 @@ import com.google.gson.Gson;
 @PluginDescription(title="JSON Webhook", description="")
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
-    @PluginProperty(name = "webhookURL", title = "URL(s)", description = "Enter comma-separated URLs", required = true)
+    @PluginProperty(name = "webhookURL", title = "URL", required = true)
     private String STR_WEBHOOK_URL; // from GUI input
 
     public JsonWebhookNotificationPlugin() {
@@ -49,31 +48,11 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
         Gson gson = new Gson();
         String executionJson = gson.toJson(allData);
 
-        // post json to URLs
-        List<HttpResponse> failedResponses = new ArrayList<>();
-
-        List<String> webhookUrls = Arrays.asList(STR_WEBHOOK_URL.split(","));
-        for (String url: webhookUrls) {
-            url = url.trim();
-            HttpResponse response = postWebhook(url, executionJson);
-            if (response.getCode() != HttpURLConnection.HTTP_OK) {
-                failedResponses.add(response);
-            }
-        }
-        if (!failedResponses.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (HttpResponse res: failedResponses) {
-                sb.append(res.getUrl())
-                        .append(", server response ")
-                        .append(res.getCode())
-                        .append(", ")
-                        .append(res.getMessage())
-                        .append("; ");
-            }
-            // TODO: refactor
-            sb.deleteCharAt(sb.length()-1);
-            sb.deleteCharAt(sb.length()-1);
-            throw new JsonWebhookNotificationPluginException("Failed to POST to following URLs: " + sb.toString());
+        // post json webhook
+        HttpResponse response = postWebhook(STR_WEBHOOK_URL, executionJson);
+        if (response.getCode() != HttpURLConnection.HTTP_OK) {
+            throw new JsonWebhookNotificationPluginException("URL " + STR_WEBHOOK_URL + ": Unable to POST notification: " +
+                    "server response: " + response.getCode() + " " + response.getMessage());
         }
         return true;
     }
