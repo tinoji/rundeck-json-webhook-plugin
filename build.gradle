@@ -1,5 +1,5 @@
 group 'com.ketsuago'
-version '1.0-SNAPSHOT'
+version '1.0'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 
@@ -19,7 +19,10 @@ dependencies {
 ext.pluginClassNames='com.ketsuago.rundeck.plugins.webhook.JsonWebhookNotificationPlugin'
 jar {
     manifest {
-        attributes 'Rundeck-Plugin-Version': '1.2', 'Rundeck-Plugin-Archive': 'true', 'Rundeck-Plugin-Classnames': pluginClassNames, 'Rundeck-Plugin-File-Version': "${version}"
+        attributes 'Rundeck-Plugin-Version': '1.2',
+                   'Rundeck-Plugin-Archive': 'true',
+                   'Rundeck-Plugin-Classnames': pluginClassNames,
+                   'Rundeck-Plugin-File-Version': "${version}"
     }
 }
 

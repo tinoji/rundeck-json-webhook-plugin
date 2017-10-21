@@ -27,7 +27,7 @@ import java.util.*;
 import com.google.gson.Gson;
 
 @Plugin(service="Notification",name="JsonWebhookNotification")
-@PluginDescription(title="JSON Webhook", description="")
+@PluginDescription(title="JSON Webhook", description="POST Webhook in the JSON format")
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
 
     @PluginProperty(name = "webhookURL", title = "URL", required = true)
