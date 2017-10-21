@@ -18,7 +18,6 @@ You can get jar file by building the source by gradle.
 
 ## Configuration
 The configuration setting is the same as the default case. Check `JSON Webhook` box and enter Webhook URL.
-
 It is not supported to POST to multiple destinations. Do not enter comma-separated URLs.
 
 ![configuration](https://github.com/tinoji/rundeck-json-webhook-plugin/blob/images/images/configuration.png)
