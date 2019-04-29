@@ -1,5 +1,5 @@
 # rundeck-json-webhook-plugin
-A Rundeck plugin to POST JSON data to a Webhook URL.
+A Rundeck plugin to POST JSON data to a Webhook URL. This plugin just sends JSON instead of XML to Webhook URL. The documentation of the builtin notification plugin for XML is: https://docs.rundeck.com/docs/manual/notifications/webhooks.html
 
 This plugin was developed for [Huginn](https://github.com/huginn/huginn) which supports only Webhook in the JSON format.
 
