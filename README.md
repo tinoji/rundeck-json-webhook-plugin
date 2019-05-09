@@ -1,8 +1,7 @@
 # rundeck-json-webhook-plugin
-A Rundeck plugin to POST JSON data to a Webhook URL. This plugin just sends JSON instead of XML to Webhook URL. The documentation of the builtin notification plugin for XML is: https://docs.rundeck.com/docs/manual/notifications/webhooks.html
+A Rundeck plugin to POST JSON data to a list of Webhook URL(s). This plugin just sends JSON instead of XML to Webhook URL. The documentation of the builtin notification plugin for XML is: https://docs.rundeck.com/docs/manual/notifications/webhooks.html
 
 This plugin was developed for [Huginn](https://github.com/huginn/huginn) which supports only Webhook in the JSON format.
-
 
 ## Installation
 1. Download jar file from the [latest release](https://github.com/tinoji/rundeck-json-webhook-plugin/releases)
@@ -17,8 +16,7 @@ You can get jar file by building the source by gradle.
 
 
 ## Configuration
-The configuration setting is the same as the default Webhook notification. Check `JSON Webhook` box and enter Webhook URL.
-It is not supported to POST to multiple destinations. Do not enter comma-separated URLs.
+The configuration setting is the same as the default Webhook notification. Check `JSON Webhook` box and enter comma-separated Webhook URLs.
 
 ![configuration](https://github.com/tinoji/rundeck-json-webhook-plugin/blob/images/images/configuration.png)
 

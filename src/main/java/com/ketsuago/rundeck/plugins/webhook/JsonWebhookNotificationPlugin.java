@@ -17,20 +17,33 @@
 
 package com.ketsuago.rundeck.plugins.webhook;
 
-import com.dtolabs.rundeck.plugins.notification.NotificationPlugin;
 import com.dtolabs.rundeck.core.plugins.Plugin;
 import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.descriptions.PluginProperty;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.dtolabs.rundeck.plugins.notification.NotificationPlugin;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Plugin(service="Notification",name="JsonWebhookNotification")
-@PluginDescription(title="JSON Webhook", description="POST Webhook in the JSON format")
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.util.Map;
+
+@Plugin( service="Notification",name="JsonWebhookNotification" )
+@PluginDescription( title="JSON Webhook", description="POST Webhook in the JSON format" )
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @PluginProperty(name = "webhookURL", title = "URL", required = true)
+    private final int CONNECTION_TIMEOUT = 5 * 1000; //5 seconds
+
+    @PluginProperty( name = "webhookURL",
+            title = "URL(s)",
+            description = "Comma-separated URLs",
+            required = true )
     private String STR_WEBHOOK_URL; // from GUI input
 
     public JsonWebhookNotificationPlugin() {
@@ -38,72 +51,79 @@ public class JsonWebhookNotificationPlugin implements NotificationPlugin {
     }
 
     public boolean postNotification(String trigger, Map executionData, Map config) {
-        // merge trigger, executionData and config
-        Map<String, Object> allData = new HashMap<>();
-        allData.put("trigger", trigger);
-        allData.put("execution", executionData);
-        allData.put("config", config);
+        String[] strUrls = STR_WEBHOOK_URL.split(",");
+        if ( strUrls.length > 0 ) {
 
-        // convert map to json
-        Gson gson = new Gson();
-        String executionJson = gson.toJson(allData);
+            // convert map to json
+            Gson gson = new Gson();
+            String requestPayload = gson.toJson(ImmutableMap.of("trigger", trigger,
+                    "execution", executionData,
+                    "config", config));
 
-        // post json webhook
-        HttpResponse response = postWebhook(STR_WEBHOOK_URL, executionJson);
-        if (response.getCode() != HttpURLConnection.HTTP_OK) {
-            throw new JsonWebhookNotificationPluginException("URL " + STR_WEBHOOK_URL + ": Unable to POST notification: " +
-                    "server response: " + response.getCode() + " " + response.getMessage());
+            for (String strUrl : strUrls) {
+                if (strUrl.length() == 0 || strUrl.trim().length() == 0)
+                    continue;
+
+                if (logger.isDebugEnabled())
+                    logger.debug("Sending notification to [{}]", strUrl);
+
+                // post json webhook
+                postWebhook(strUrl, requestPayload);
+            }
         }
+
         return true;
     }
 
-
-    private HttpResponse postWebhook(String strUrl, String message) {
-        HttpURLConnection con = null;
+    private void postWebhook(String strUrl, String requestPayload) {
+        HttpURLConnection connection = null;
         try {
-            URL url = toURL(strUrl);
-            con = openConnection(url);
-            con.setDoOutput(true);
-            putRequestStream(con, message);
-            con.connect();
+            URL url = new URL(strUrl);
+            connection = openConnection(url);
+            if (connection != null) {
+                appendBody(connection, requestPayload);
+                connection.connect();
 
-            return new HttpResponse(strUrl, con.getResponseCode(), con.getResponseMessage());
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
-        } finally {
-            if (con != null) {
-                con.disconnect();
+                if (connection.getResponseCode() != 200)
+                    logger.warn("Error {}, failed to send notification to [{}], response: {}", connection.getResponseCode(),
+                            strUrl, connection.getResponseMessage());
             }
+        } catch ( SocketTimeoutException ex ) {
+            logger.warn("Failed to establish connection to [" + strUrl + "]", ex);
+        } catch ( Exception ex ) {
+            logger.warn("Unhandled exception while sending notification", ex);
+        } finally {
+            if (connection != null)
+                connection.disconnect();
         }
     }
 
-    private URL toURL(String str) {
+    private HttpURLConnection openConnection(URL requestUrl) {
         try {
-            return new URL(str);
-        } catch (MalformedURLException e) {
-            throw new JsonWebhookNotificationPluginException("Webhook URL is malformed: [" + e.getMessage() +"]", e);
+            HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setConnectTimeout(CONNECTION_TIMEOUT);
+            connection.setReadTimeout(CONNECTION_TIMEOUT);
+
+            return connection;
+        } catch (SocketTimeoutException ex) {
+            logger.warn( "Failed to establish connection to [" + requestUrl + "]", ex );
+            return null;
+        } catch (Exception ex) {
+            logger.warn( "Unhandled exception while establishing connection", ex );
+            return null;
         }
     }
 
-    private HttpURLConnection openConnection(URL url) {
-        try {
-            return (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error opening connection: [" + e.getMessage() + "]", e);
-        }
-    }
-
-    private void putRequestStream(HttpURLConnection con, String message) {
-        try {
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-            out.write(message);
-            out.close();
-        } catch (ProtocolException e) {
-            throw new JsonWebhookNotificationPluginException("Error in the underlying protocol: [" + e.getMessage() + "]", e);
-        } catch (IOException e) {
-            throw new JsonWebhookNotificationPluginException("Error putting data to Webhook URL: [" + e.getMessage() + "]", e);
+    private void appendBody(HttpURLConnection connection, String payload) {
+        try (final DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
+            writer.writeBytes( payload );
+            writer.flush();
+        } catch (IOException ex) {
+            logger.warn( "Unable to write request payload", ex );
         }
     }
 }
