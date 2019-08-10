@@ -34,7 +34,7 @@ import java.net.URL;
 import java.util.Map;
 
 @Plugin( service="Notification",name="JsonWebhookNotification" )
-@PluginDescription( title="JSON Webhook", description="POST Webhook in the JSON format" )
+@PluginDescription( title="JSON Webhook", description="" )
 public class JsonWebhookNotificationPlugin implements NotificationPlugin {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
